@@ -27,7 +27,22 @@ def dropSand(rock, sand, sandOrigin, xMin, xMax, yMin, yMax):
     sand.add(tuple(sandPos))
     return True
 
-def dropSandFloor(rock, sand, sandOrigin, xMin, xMax, yMin, yMax, yFloor):
+def bfsDropSandFloor(rock, sand, sandOrigin, yFloor):
+    sandPosToVisit = [sandOrigin]
+    while len(sandPosToVisit) > 0:
+        for sandPos in sandPosToVisit:
+            while sandPos in sandPosToVisit:
+                sandPosToVisit.remove(sandPos)
+            if sandPos not in rock|sand:
+                sand.add(sandPos)
+                if sandPos[1]+1 < yFloor:
+                    sandPosToVisit.append( (sandPos[0] - 1, sandPos[1]+1) )
+                    sandPosToVisit.append( (sandPos[0], sandPos[1]+1) )
+                    sandPosToVisit.append( (sandPos[0] + 1, sandPos[1]+1) )
+
+
+# Brute force solution to part 2
+def dropSandFloor(rock, sand, sandOrigin, yFloor):
     sandPos = list(sandOrigin)
     while True:
         if sandPos[1]+1 == yFloor:
@@ -92,8 +107,10 @@ sand = set()
 
 yFloor = 2 + yMax
 
-while(dropSandFloor(rock, sand, sandOrigin, xMin, xMax, yMin, yMax, yFloor)):
-    pass
+# while(dropSandFloor(rock, sand, sandOrigin, yFloor)):
+#     pass
+
+bfsDropSandFloor(rock, sand, sandOrigin, yFloor)
 
 # draw(rock, sand, sandOrigin, xMin, xMax, yMin, yMax)
 
