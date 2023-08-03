@@ -1,5 +1,5 @@
 import time
-fileName = "test_input"
+fileName = "input"
 
 memoDecision = dict()
 
@@ -18,10 +18,10 @@ sPaths = dict()
 valveBit = dict()
 
 def getOrderedStringSet(mySet):
-	x = list(mySet)
-	x.sort()
-	s = '.'.join(x)
-	return s
+    x = list(mySet)
+    x.sort()
+    s = '.'.join(x)
+    return s
 
 def getShortestPaths(tunnels):
     valveSet = set(tunnels.keys())
@@ -249,8 +249,9 @@ def maxSumElephantAlt(currentValve, currentValveElephant, ttReady, ttReadyElepha
     
     
     if ttReady == 0 and ttReadyElephant != 0:
-        for nextValve in valvesNotOperated:
-            if remainingMinutes-sPaths[currentValve][nextValve] >= 0:
+        canReach = {valve for valve in valvesNotOperated if remainingMinutes-sPaths[currentValve][valve] >= 0}
+        if len(canReach) > 0:
+            for nextValve in canReach:
                 pressure = (remainingMinutes-sPaths[currentValve][nextValve])*flowRate[nextValve]
                 leastPath = min(sPaths[currentValve][nextValve],ttReadyElephant)
                 maxFound = max(pressure+maxSumElephantAlt(
@@ -260,9 +261,19 @@ def maxSumElephantAlt(currentValve, currentValveElephant, ttReady, ttReadyElepha
                     ttReadyElephant - leastPath,
                     remainingMinutes - leastPath, 
                     valvesNotOperatedBits&(~(0b1<<valveBit[nextValve]))), maxFound)
+        else:
+            maxFound = max(maxSumElephantAlt(
+                    currentValve, 
+                    currentValveElephant, 
+                    0,
+                    0,
+                    remainingMinutes - ttReadyElephant, 
+                    valvesNotOperatedBits), maxFound)
+            
     if ttReady != 0 and ttReadyElephant == 0:
-        for nextValveElephant in valvesNotOperated:
-            if remainingMinutes-sPaths[currentValveElephant][nextValveElephant] >= 0:
+        canReachElephant = {valve for valve in valvesNotOperated if remainingMinutes-sPaths[currentValveElephant][valve] >= 0}
+        if len(canReachElephant) > 0:
+            for nextValveElephant in canReachElephant:
                 pressure = (remainingMinutes-sPaths[currentValveElephant][nextValveElephant])*flowRate[nextValveElephant]
                 leastPath = min(sPaths[currentValveElephant][nextValveElephant],ttReady)
                 maxFound = max(pressure+maxSumElephantAlt(
@@ -272,6 +283,14 @@ def maxSumElephantAlt(currentValve, currentValveElephant, ttReady, ttReadyElepha
                     sPaths[currentValveElephant][nextValveElephant] - leastPath,
                     remainingMinutes - leastPath, 
                     valvesNotOperatedBits&(~(0b1<<valveBit[nextValveElephant]))), maxFound)
+        else:
+            maxFound = max(maxSumElephantAlt(
+                    currentValve, 
+                    currentValveElephant, 
+                    0,
+                    0,
+                    remainingMinutes - ttReady, 
+                    valvesNotOperatedBits), maxFound)
     memoAltElephant[memoKey] = maxFound
     return maxFound
 
@@ -340,8 +359,7 @@ with open(file=fileName, mode="r") as f:
             valvesNotOperated.add(valve)
         for tunnel in line[9:]:
             tunnels[valve].append(tunnel.strip(',').strip('\n'))
-
-
+            
 valveBit = {valve:bit for valve,bit in zip(valvesNotOperated,range(0,len(valvesNotOperated)))}
 
 valvesNotOperatedBits = 0
