@@ -180,15 +180,23 @@ with open(file=fileName, mode="r") as f:
 		)
 		blueprints.append(newBlueprint)
 
+maxGeodes = []
 sumQuality = 0
 ts = time.time()
-maxGeodes = []
-for index, blueprint in enumerate(blueprints[:3]):
-	print(index+1)
-	maxGeodes.append(getMaxGeode(32,initProduction,initStock,blueprint))
+for index, blueprint in enumerate(blueprints):
+	maxGeodes.append(getMaxGeode(24,initProduction,initStock,blueprint))
 	sumQuality += maxGeodes[-1]*(index+1)
 	memo = {}
 te = time.time()
-
-print(maxGeodes[0]*maxGeodes[1]*maxGeodes[2])
 print(sumQuality, te-ts)
+
+
+maxGeodes = []
+ts = time.time()
+for blueprint in blueprints[:3]:
+	maxGeodes.append(getMaxGeode(32,initProduction,initStock,blueprint))
+	memo = {}
+te = time.time()
+
+print(maxGeodes[0]*maxGeodes[1]*maxGeodes[2], te-ts)
+
