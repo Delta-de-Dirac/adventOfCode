@@ -1,9 +1,13 @@
 import math
+import time
+from matplotlib import pyplot as plt
 fileName = "input"
 
 memo = {}
 
 def getMaxGeode(time, production, stock, blueprint):
+	if time == 1:
+		return stock[3] + production[3]
 	if time == 0:
 		return stock[3]
 	memoKey = (
@@ -16,8 +20,12 @@ def getMaxGeode(time, production, stock, blueprint):
 		return memo[memoKey]
 	maxFound = 0
 	cantBuildAnything = True
+	shouldBuildOre = production[0] < max(blueprint[0][0],blueprint[1][0],blueprint[2][0],blueprint[3][0]) and stock[0] < (time-1)*max(blueprint[0][0],blueprint[1][0],blueprint[2][0],blueprint[3][0])
+	shouldBuildClay = production[1] < blueprint[2][1] and stock[1] < (time-1)*blueprint[2][1]
+	shouldBuildObsidian = production[1] > 0 and production[2] < blueprint[3][1] and stock[2] < (time-1)*blueprint[3][1]
+	shouldBuildGeode = production[2] > 0
 	# build ore next 
-	if production[0] < max(blueprint[0][0],blueprint[1][0],blueprint[2][0],blueprint[3][0]):
+	if shouldBuildOre:
 		timeToResource = max(
 			math.ceil((blueprint[0][0] - stock[0])/production[0]), 
 			0
@@ -45,7 +53,7 @@ def getMaxGeode(time, production, stock, blueprint):
 				maxFound
 			)
 	# build clay next 
-	if production[1] < blueprint[2][1]:
+	if shouldBuildClay:
 		timeToResource = max(
 			math.ceil((blueprint[1][0] - stock[0])/production[0]), 
 			0
@@ -73,7 +81,7 @@ def getMaxGeode(time, production, stock, blueprint):
 				maxFound
 			)
 	# build obsidian next
-	if production[1] > 0 and production[2] < blueprint[3][1]:
+	if shouldBuildObsidian:
 		timeToResource = max(
 			math.ceil((blueprint[2][0] - stock[0])/production[0]),
 			math.ceil((blueprint[2][1] - stock[1])/production[1]), 
@@ -102,7 +110,7 @@ def getMaxGeode(time, production, stock, blueprint):
 				maxFound
 			)
 	# build geode next
-	if production[2] > 0:
+	if shouldBuildGeode:
 		timeToResource = max(
 			math.ceil((blueprint[3][0] - stock[0])/production[0]),
 			math.ceil((blueprint[3][1] - stock[2])/production[2]), 
@@ -172,11 +180,15 @@ with open(file=fileName, mode="r") as f:
 		)
 		blueprints.append(newBlueprint)
 
-
 sumQuality = 0
-for index, blueprint in enumerate(blueprints):
-	print("processing bluprint ID:", index+1)
-	sumQuality += getMaxGeode(24,initProduction,initStock,blueprint)*(index+1)
-	print("quality so far:",sumQuality)
+ts = time.time()
+maxGeodes = []
+for index, blueprint in enumerate(blueprints[:3]):
+	print(index+1)
+	maxGeodes.append(getMaxGeode(32,initProduction,initStock,blueprint))
+	sumQuality += maxGeodes[-1]*(index+1)
 	memo = {}
-print(sumQuality)
+te = time.time()
+
+print(maxGeodes[0]*maxGeodes[1]*maxGeodes[2])
+print(sumQuality, te-ts)
