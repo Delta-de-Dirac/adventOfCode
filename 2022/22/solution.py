@@ -19,21 +19,39 @@ def decode_instructions(instructions):
     return instruction_list
 
 
-def linkBorder(origin1, direction1, origin2, direction2, length, input_direction, output_direction, borderLink):
+def linkBorder(origin1, direction1, origin2, direction2, length, input_direction, output_direction, borderLink,puzzle_map=None):
     pos1 = origin1
     pos2 = origin2
+    inp = []
+    outp = []
     for i in range(length):
+        inp.append(pos1)
+        outp.append(pos2)
         borderLink[(pos1, input_direction)] = (pos2, output_direction)
         pos1 = tuple(map(operator.add, pos1, direction1))
         pos2 = tuple(map(operator.add, pos2, direction2))
+    if puzzle_map != None:
+        printMap(puzzle_map, (0,0),inp,outp)
+        input()
 
-def printMap(puzzle_map, current_position):
-    for line_number in range(len(puzzle_map)):
-        if current_position[0] == line_number:
-            line = list(puzzle_map[line_number]).copy()
-            line[current_position[1]] = '@'
-            print("".join(line))
-        print(puzzle_map[line_number])
+def printMap(puzzle_map, current_position, inp, outp):
+    for line_number in range(-1, len(puzzle_map)+1):
+        for column_number in range(-1,max(map(len, puzzle_map))+1):
+            if (line_number,column_number) == current_position:
+                print('@', end="")
+                continue
+            if (line_number,column_number) in inp:
+                print('I', end="")
+                continue
+            if (line_number,column_number) in outp:
+                print('O', end="")
+                continue
+            if line_number in list(range(len(puzzle_map))):
+                if column_number in list(range(len(puzzle_map[line_number]))):
+                    print(puzzle_map[line_number][column_number], end="")
+                    continue
+            print(' ', end='')
+        print('',end="\n")
 
 puzzle_map = []
 
@@ -191,31 +209,29 @@ if fileName == "input":
     current_direction = (0, 1)
     current_position = (0, 50)
 
-    linkBorder((50, 150), (-1, 0), (100, 99), (1, 0), 50, (0, 1), (0, -1), borderLink)
-    linkBorder((100, 100), (1, 0), (49, 149), (-1, 0), 50, (0, 1), (0, -1), borderLink)
+    linkBorder((49, 150), (-1, 0), (100, 99), (1, 0), 50, (0, 1), (0, -1), borderLink, puzzle_map)
+    linkBorder((100, 100), (1, 0), (49, 149), (-1, 0), 50, (0, 1), (0, -1), borderLink, puzzle_map)
 
-    linkBorder((50, 100), (1, 0), (49, 100), (0, 1), 50, (0, 1), (-1, 0), borderLink)
-    linkBorder((50, 100), (0, 1), (50, 99), (1, 0), 50, (1, 0), (0, -1), borderLink)
+    linkBorder((50, 100), (1, 0), (49, 100), (0, 1), 50, (0, 1), (-1, 0), borderLink, puzzle_map)
+    linkBorder((50, 100), (0, 1), (50, 99), (1, 0), 50, (1, 0), (0, -1), borderLink, puzzle_map)
 
-    linkBorder((150, 50), (1, 0), (149, 50), (0, 1), 50, (0, 1), (-1, 0), borderLink)
-    linkBorder((150, 50), (0, 1), (150, 49), (1, 0), 50, (1, 0), (0, -1), borderLink)
+    linkBorder((150, 50), (1, 0), (149, 50), (0, 1), 50, (0, 1), (-1, 0), borderLink, puzzle_map)
+    linkBorder((150, 50), (0, 1), (150, 49), (1, 0), 50, (1, 0), (0, -1), borderLink, puzzle_map)
 
-    linkBorder((99, 49), (0, -1), (99, 50), (-1, 0), 50, (-1, 0), (0, 1), borderLink)
-    linkBorder((99, 49), (-1, 0), (100, 49), (0, -1), 50, (0, -1), (1, 0), borderLink)
+    linkBorder((99, 49), (0, -1), (99, 50), (-1, 0), 50, (-1, 0), (0, 1), borderLink, puzzle_map)
+    linkBorder((99, 49), (-1, 0), (100, 49), (0, -1), 50, (0, -1), (1, 0), borderLink, puzzle_map)
 
-    linkBorder((49, 49), (-1, 0), (100, 0), (1, 0), 50, (0, -1), (0, 1), borderLink)
-    linkBorder((100, -1), (1, 0), (49, 50), (-1, 0), 50, (0, -1), (1, 0), borderLink)
+    linkBorder((49, 49), (-1, 0), (100, 0), (1, 0), 50, (0, -1), (0, 1), borderLink, puzzle_map)
+    linkBorder((100, -1), (1, 0), (49, 50), (-1, 0), 50, (0, -1), (0, 1), borderLink, puzzle_map)
 
-    linkBorder((-1, 50), (0, 1), (150, 0), (1, 0), 50, (-1, 0), (0, 1), borderLink)
-    linkBorder((150, -1), (1, 0), (0, 50), (0, 1), 50, (0, -1), (1, 0), borderLink)
+    linkBorder((-1, 50), (0, 1), (150, 0), (1, 0), 50, (-1, 0), (0, 1), borderLink, puzzle_map)
+    linkBorder((150, -1), (1, 0), (0, 50), (0, 1), 50, (0, -1), (1, 0), borderLink, puzzle_map)
 
-    linkBorder((-1, 100), (0, 1), (199, 0), (0, 1), 50, (-1, 0), (-1, 0), borderLink)
-    linkBorder((200, 0), (0, 1), (0, 100), (0, 1), 50, (1, 0), (1, 0), borderLink)
-    #OK
+    linkBorder((-1, 100), (0, 1), (199, 0), (0, 1), 50, (-1, 0), (-1, 0), borderLink, puzzle_map)
+    linkBorder((200, 0), (0, 1), (0, 100), (0, 1), 50, (1, 0), (1, 0), borderLink, puzzle_map)
 
+path = []
 for instruction in instruction_list:
-    print(instruction, current_position, current_direction)
-    printMap(puzzle_map, current_position)
     if type(instruction) is type(int(1)):
         for i in range(instruction):
             next_position = tuple(map(operator.add, current_position, current_direction))
