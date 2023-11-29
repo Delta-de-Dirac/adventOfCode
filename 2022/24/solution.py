@@ -113,3 +113,60 @@ while True:
     possiblePositions = newPossiblePositions
     continue
 
+# part 2
+
+possiblePositions = {(-1, 0)}
+
+time = 0
+
+
+stage = 0
+
+# stage 0 -> go to end
+# stage 1 -> go back
+# stage 2 -> go to end again
+
+while True:
+    newPossiblePositions = set()
+
+    for position in possiblePositions:
+        line, column = position
+        # wait
+        if testValidMinute(width, height, line, column, badMinutesHorizontal,
+                           badMinutesVertical, time+1):
+            newPossiblePositions.add((line, column))
+        # N
+        if testValidMinute(width, height, line-1, column, badMinutesHorizontal,
+                           badMinutesVertical, time+1):
+            newPossiblePositions.add((line-1, column))
+        # S
+        if testValidMinute(width, height, line+1, column, badMinutesHorizontal,
+                           badMinutesVertical, time+1):
+            newPossiblePositions.add((line+1, column))
+        # W
+        if testValidMinute(width, height, line, column-1, badMinutesHorizontal,
+                           badMinutesVertical, time+1):
+            newPossiblePositions.add((line, column-1))
+        # E
+        if testValidMinute(width, height, line, column+1, badMinutesHorizontal,
+                           badMinutesVertical, time+1):
+            newPossiblePositions.add((line, column+1))
+    if stage == 0:
+        if (height, width-1) in newPossiblePositions:
+            time = time + 1
+            possiblePositions = {(height, width-1)}
+            stage = 1
+            continue
+    if stage == 1:
+        if (-1, 0) in newPossiblePositions:
+            time = time + 1
+            possiblePositions = {(-1, 0)}
+            stage = 2
+            continue
+    if stage == 2:
+        if (height, width-1) in newPossiblePositions:
+            print(time + 1)
+            break
+    time = time+1
+    possiblePositions = newPossiblePositions
+    continue
