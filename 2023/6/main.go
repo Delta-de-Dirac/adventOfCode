@@ -7,6 +7,7 @@ import (
 	"strings"
 	"math"
 	"strconv"
+	"fmt"
 )
 
 func getAmountOfWaysToWin(mt, md int) int{
@@ -59,5 +60,25 @@ func main(){
 	log.Println("Result part 1:", product)
 
 	// part 2
+
+	part2TimeStr := ""
+	part2DistanceStr := ""
+	for i := range mts{
+		part2TimeStr += fmt.Sprint(mts[i])
+		part2DistanceStr += fmt.Sprint(mds[i])
+	}
+	part2Time, err := strconv.Atoi(part2TimeStr)
+	if err != nil{
+		log.Fatal(err)
+	}
+	part2Distance, err := strconv.Atoi(part2DistanceStr)
+	if err != nil{
+		log.Fatal(err)
+	}
+
+	log.Println("Result part 2:", getAmountOfWaysToWin(part2Time, part2Distance))
+
+
+
 	return
 }
