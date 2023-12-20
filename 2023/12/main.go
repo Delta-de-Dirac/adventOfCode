@@ -41,7 +41,78 @@ func countValidRecords(record []uint8, groups []int) int{
 	subdot[modPos] = '.'
 	subhash := slices.Clone(record)
 	subhash[modPos] = '#'
-	return countValidRecords(subdot, groups) + countValidRecords(subhash,groups)
+
+
+	subdotValid := true
+	subhashValid := true
+	if slices.Contains(subdot, '?'){
+		subdotValid = validatePartial(subdot, groups)
+		subhashValid = validatePartial(subhash, groups)
+	}
+	switch [2]bool{subdotValid, subhashValid}{
+		case [2]bool{true, true}:
+			return countValidRecords(subdot, groups) + countValidRecords(subhash,groups)
+		case [2]bool{false, true}:
+			return countValidRecords(subhash,groups)
+		case [2]bool{true, false}:
+			return countValidRecords(subdot, groups)
+		case [2]bool{false, false}:
+			return 0
+		default:
+			log.Fatal("Cannot be here")
+	}
+	log.Fatal("Cannot be here")
+	return 0
+
+	//return countValidRecords(subdot, groups) + countValidRecords(subhash,groups)
+}
+
+func validatePartial(record []uint8, groups []int) bool{
+	if !slices.Contains(record, '?'){
+		log.Fatal("Can only validate partial if has ? unknown")
+	}
+	currentGroup := 0
+	lookingForGroup := 0
+	for i,v:=range(record){
+		if v == '?'{
+			sizeAvailable := len(record) - i
+			sizeNeeded:=0
+			sizeNeeded+=(currentGroup - groups[lookingForGroup])
+			lookingForGroup++
+			for ;lookingForGroup<len(groups);{
+				sizeNeeded+=1+groups[lookingForGroup]
+				lookingForGroup++
+			}
+			if sizeNeeded > sizeAvailable{
+				return false
+			}
+			break
+		}
+		if v == '#'{
+			currentGroup++
+			if currentGroup > groups[lookingForGroup]{
+				return false
+			}
+			continue
+		}
+		if v == '.'{
+			if currentGroup == 0{
+				continue
+			}
+			if currentGroup != groups[lookingForGroup]{
+				return false
+			}
+			currentGroup = 0
+			lookingForGroup++
+			if lookingForGroup >= len(groups){
+				if slices.Contains(record[i:], '#'){
+					return false
+				}
+				break
+			}
+		}
+	}
+	return true
 }
 
 func main(){
@@ -76,5 +147,28 @@ func main(){
 		sum += countValidRecords(records[i],groups[i])
 	}
 	log.Println("Result part 1:", sum)
+
+	// part 2
+	for i := range(records){
+		newRecord := make([]uint8,0)
+		newGroup := make([]int,0)
+		for j:=0;j<5;j++{
+			newRecord = append(newRecord, records[i]...)
+			if j!=4{
+				newRecord = append(newRecord, '?')
+			}
+			newGroup = append(newGroup, groups[i]...)
+		}
+		records[i] = newRecord
+		groups[i] = newGroup
+	}
+
+	sum = 0
+	for i := range(records){
+		log.Println(i)
+		sum += countValidRecords(records[i],groups[i])
+	}
+	log.Println("Result part 2:", sum)
+
 	return
 }
