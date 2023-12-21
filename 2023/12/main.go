@@ -4,119 +4,110 @@ import (
 	"bufio"
 	"log"
 	"os"
-	"slices"
+	_"slices"
 	"strconv"
 	"strings"
 )
 
 
-func validateRecord(record []uint8, groups []int) bool{
-	if slices.Contains(record, '?'){
-		log.Fatal("No ? in validate! ", record)
-		return false
+
+var makeGroupMemo map[int]([]uint8)
+
+func makeGroup(size int) []uint8{
+	val, ok := makeGroupMemo[size]
+	if ok{
+		return val
 	}
-	fields := strings.FieldsFunc(string(record), func(r rune) bool {
-		return (r == '.')
-	})
-	if len(fields) != len(groups){
-		return false
+	val = make([]uint8, 0)
+	for i:=0;i<size;i++{
+		val = append(val, '#')
 	}
-	for i := range(fields){
-		if len(fields[i]) != groups[i]{
-			return false
-		}
-	}
-	return true
+	makeGroupMemo[size] = val
+	return val
 }
 
-func countValidRecords(record []uint8, groups []int) int{
-	if !slices.Contains(record, '?'){
-		if validateRecord(record, groups){
-			return 1
-		}
-		return 0
+func testMatch(match []uint8, target[]uint8) bool{
+	//log.Printf("{%s}<=>{%s}", match, target)
+	if len(match) != len(target){
+		log.Fatal("match must have same length as target")
 	}
-	modPos := slices.Index(record, '?')
-	subdot := slices.Clone(record)
-	subdot[modPos] = '.'
-	subhash := slices.Clone(record)
-	subhash[modPos] = '#'
-
-
-	subdotValid := true
-	subhashValid := true
-	if slices.Contains(subdot, '?'){
-		subdotValid = validatePartial(subdot, groups)
-		subhashValid = validatePartial(subhash, groups)
-	}
-	switch [2]bool{subdotValid, subhashValid}{
-		case [2]bool{true, true}:
-			return countValidRecords(subdot, groups) + countValidRecords(subhash,groups)
-		case [2]bool{false, true}:
-			return countValidRecords(subhash,groups)
-		case [2]bool{true, false}:
-			return countValidRecords(subdot, groups)
-		case [2]bool{false, false}:
-			return 0
-		default:
-			log.Fatal("Cannot be here")
-	}
-	log.Fatal("Cannot be here")
-	return 0
-
-	//return countValidRecords(subdot, groups) + countValidRecords(subhash,groups)
-}
-
-func validatePartial(record []uint8, groups []int) bool{
-	if !slices.Contains(record, '?'){
-		log.Fatal("Can only validate partial if has ? unknown")
-	}
-	currentGroup := 0
-	lookingForGroup := 0
-	for i,v:=range(record){
-		if v == '?'{
-			sizeAvailable := len(record) - i
-			sizeNeeded:=0
-			sizeNeeded+=(currentGroup - groups[lookingForGroup])
-			lookingForGroup++
-			for ;lookingForGroup<len(groups);{
-				sizeNeeded+=1+groups[lookingForGroup]
-				lookingForGroup++
-			}
-			if sizeNeeded > sizeAvailable{
-				return false
-			}
-			break
-		}
-		if v == '#'{
-			currentGroup++
-			if currentGroup > groups[lookingForGroup]{
-				return false
-			}
-			continue
-		}
-		if v == '.'{
-			if currentGroup == 0{
-				continue
-			}
-			if currentGroup != groups[lookingForGroup]{
-				return false
-			}
-			currentGroup = 0
-			lookingForGroup++
-			if lookingForGroup >= len(groups){
-				if slices.Contains(record[i:], '#'){
+	for i,v:=range(match){
+		switch v{
+			case '.':
+				if target[i] == '#'{
 					return false
 				}
-				break
-			}
+			case '#':
+				if target[i] == '.'{
+					return false
+				}
+			default:
+				log.Fatal("you shouldn't be here")
 		}
 	}
 	return true
 }
+
+func sliceSum(s []int) int{
+	acc := 0
+	for _,v:=range(s){
+		acc += v
+	}
+	return acc
+}
+
+func recCount(possibleLocations [][]int, groups []int, groupIndex int, startFrom int) int{
+	if groupIndex >= len(groups){
+		return 1
+	}
+	acc := 0
+	outer:
+	for _, pos := range(possibleLocations[groupIndex]){
+		for ;pos < startFrom;{
+			continue outer
+		}
+		acc += recCount(possibleLocations, groups, groupIndex+1, pos+1+groups[groupIndex])
+	}
+	return acc
+}
+
+func countValidRecords(record []uint8, group []int) int{
+	possibleLocations := [][]int{}
+	log.Printf("%s||%v",record, group)
+	for _,g := range(group){
+		locations := []int{}
+		for i:=0;i<len(record)-g+1;i++{
+			if !testMatch(makeGroup(g), record[i:i+g]){
+				continue
+			}
+			if i > 0{
+				if record[i-1] == '#'{
+					continue
+				}
+			}
+			if i+g < len(record)-1{
+				if record[i+g] == '#'{
+					continue
+				}
+			}
+			locations = append(locations, i)
+		}
+		possibleLocations = append(possibleLocations, locations)
+	}
+	//log.Println(possibleLocations)
+	res := recCount(possibleLocations,group,0,0)
+
+	log.Println(res)
+
+	return res
+}
+
 
 func main(){
 	log.Println("Starting...")
+
+	makeGroupMemo = make(map[int]([]uint8))
+
 	if len(os.Args) != 2 {
 		log.Println("Program takes exactly one argument")
 		log.Fatalf("Usage: %s <input fileName>", os.Args[0])
@@ -149,6 +140,8 @@ func main(){
 	log.Println("Result part 1:", sum)
 
 	// part 2
+	//records = [][]uint8{[]uint8("?###????????")}
+	//groups = [][]int{[]int{3,2,1}}
 	for i := range(records){
 		newRecord := make([]uint8,0)
 		newGroup := make([]int,0)
@@ -164,9 +157,12 @@ func main(){
 	}
 
 	sum = 0
+
 	for i := range(records){
-		log.Println(i)
-		sum += countValidRecords(records[i],groups[i])
+
+		partial := countValidRecords(records[i],groups[i])
+		//log.Println(i, partial)
+		sum += partial
 	}
 	log.Println("Result part 2:", sum)
 
