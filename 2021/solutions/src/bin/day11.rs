@@ -106,5 +106,5 @@ fn main(){
         if delta  == 100 {break;}
     }
 
-    println!("Result part 1: {result}");
+    println!("Result part 2: {result}");
 }
