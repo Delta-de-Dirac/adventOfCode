@@ -6,36 +6,114 @@ enum SNumElement {
     Pair(Box<SNumElement>, Box<SNumElement>),
 }
 
-fn explode_snum(root: &mut SNumElement) {
+fn snum_mag(root: &SNumElement) -> i32 {
+    match root {
+        SNumElement::Literal(i) => {
+            return *i;
+        }
+        SNumElement::Pair(left, right) => {
+            return 3*snum_mag(left) + 2*snum_mag(right);
+        }
+    }
+}
+
+fn split_snum(root: &mut SNumElement) -> bool {
+    let mut stack = vec![root];
+    let mut to_split: Option<&mut SNumElement> = None;
+
+    while let Some(node) = stack.pop() {
+        match node {
+            SNumElement::Literal(i) if *i >= 10 => {
+                to_split = Some(node);
+                break;
+            },
+            SNumElement::Pair(left, right) => {
+                stack.push(right);
+                stack.push(left);
+            },
+            SNumElement::Literal(_) => {
+                continue;
+            },
+        }
+    }
+
+    let splt_happened = to_split.is_some();
+
+    if let Some(to_split) = to_split {
+        if let SNumElement::Literal(s_val) = to_split {
+            *to_split = SNumElement::Pair(
+                Box::new(
+                    SNumElement::Literal(
+                        (*s_val as f32 / 2.0).floor() as i32
+                    )
+                ),
+                Box::new(
+                    SNumElement::Literal(
+                        (*s_val as f32 / 2.0).ceil() as i32
+                    )
+                )
+            );
+        }
+    }
+
+    return splt_happened;
+}
+
+fn explode_snum(root: &mut SNumElement) -> bool {
     let mut stack = vec![(root, 0)];
 
-    let mut to_left: Option<&mut SNumElement> = None;
-
+    let mut to_left:    Option<&mut SNumElement> = None;
+    let mut to_right:   Option<&mut SNumElement> = None;
+    let mut to_explode: Option<&mut SNumElement> = None;
 
     while let Some((node, d)) = stack.pop() {
         match node {
             SNumElement::Literal(i) => {
-                println!("{i} {d}");
-                to_left = Some(node);
-            },
-            SNumElement::Pair(left, right) if d == 4 => {
-                if let (SNumElement::Literal(lval), SNumElement::Literal(rval)) = (**right,**left){
-                    println!("{lval}, {rval}");
+                if to_explode.is_none() {
+                    to_left =  Some(node);
+                } else {
+                    to_right = Some(node);
+                    break;
                 }
+            },
+            SNumElement::Pair(left, right) if d == 4 && to_explode.is_none() => {
+                to_explode = Some(node);
             },
             SNumElement::Pair(left, right) => {
                 stack.push((right, d+1));
-                stack.push((left, d+1));
+                stack.push((left,  d+1));
             },
         }
     }
-    if let Some(SNumElement::Literal(val)) = to_left {
-        *val = 0;
+
+    let exp_happened = to_explode.is_some();
+
+    if let Some(SNumElement::Pair(left, right)) = to_explode {
+        if let SNumElement::Literal(exp_val) = **left {
+            if let Some(SNumElement::Literal(lval)) = to_left {
+                *lval += exp_val;
+            }
+        }
+        if let SNumElement::Literal(exp_val) = **right {
+            if let Some(SNumElement::Literal(rval)) = to_right {
+                *rval += exp_val;
+            }
+        }
     }
+    if let Some(to_explode) = to_explode {
+        *to_explode = SNumElement::Literal(0);
+    }
+
+    return exp_happened;
 }
 
-fn reduce_snum(x: SNumElement) -> SNumElement {
-    todo!();
+fn reduce_snum(mut x: SNumElement) -> SNumElement {
+    loop {
+        if explode_snum(&mut x) {continue;}
+        if split_snum(&mut x) {continue;}
+        break;
+    }
+    return x;
 }
 
 fn add_snum(x: SNumElement, y: SNumElement) -> SNumElement {
@@ -115,14 +193,10 @@ fn main(){
         let (my_snum, _) = parse_snum(&parse_input);
         snums.push(my_snum);
     }
-    let root = &mut snums.pop().expect("input invalid");
 
-    explode_snum(root);
+    let result = snums.into_iter().reduce(|a, b| add_snum(a, b)).expect("reduce failed");
 
-    print_snum(root);
-
-
-    let result = 0;
+    let result = snum_mag(&result);
 
     println!("Result part 1: {result}");
 
