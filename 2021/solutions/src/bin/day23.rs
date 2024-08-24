@@ -1946,9 +1946,9 @@ fn main() {
     let bur2 = convertPart2(&bur);
 
     if let Some(result) = shortest_path2(&bur2) {
-        println!("Result part 1: {}", result);
+        println!("Result part 2: {}", result);
     } else {
-        println!("Result part 1: Could not find path");
+        println!("Result part 2: Could not find path");
     }
 
 }
