@@ -212,7 +212,7 @@ impl fmt::Display for Burrow2 {
     }
 }
 
-fn convertPart2(bur: &Burrow) -> Burrow2 {
+fn convert_part2(bur: &Burrow) -> Burrow2 {
     Burrow2 {
         cost: bur.cost,
         hall_lt: bur.hall_lt,
@@ -1943,7 +1943,7 @@ fn main() {
         println!("Result part 1: Could not find path");
     }
 
-    let bur2 = convertPart2(&bur);
+    let bur2 = convert_part2(&bur);
 
     if let Some(result) = shortest_path2(&bur2) {
         println!("Result part 2: {}", result);
