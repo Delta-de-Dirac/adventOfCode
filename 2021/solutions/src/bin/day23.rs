@@ -1835,6 +1835,29 @@ fn shortest_path(bur: &Burrow) -> Option<u32> {
     None
 }
 
+fn shortest_path2(bur: &Burrow2) -> Option<u32> {
+    let mut dist: HashMap<BurrowState2, u32> = HashMap::new();
+    let mut heap = BinaryHeap::new();
+    dist.insert(get_state2(bur), bur.cost);
+    heap.push(bur.clone());
+    while let Some(heap_bur) = heap.pop() {
+        if is_solved2(&heap_bur) { return Some(heap_bur.cost); }
+        if let Some(cost_already_at_dist) = dist.get(&get_state2(&heap_bur)){
+            if heap_bur.cost > *cost_already_at_dist { continue; } /**/
+        }
+        for next in &neighbor_list2(&heap_bur) {
+            if let Some(cost_already_at_dist) = dist.get(&get_state2(next)){
+                if next.cost >= *cost_already_at_dist {
+                    continue;
+                }
+            }
+            heap.push(next.clone());
+            dist.insert(get_state2(next), next.cost);
+        }
+    }
+    None
+}
+
 
 fn main() {
     println!("Starting...");
@@ -1922,10 +1945,10 @@ fn main() {
 
     let bur2 = convertPart2(&bur);
 
-    println!("{bur2}");
-
-    for nb in neighbor_list2(&bur2){
-        println!("{nb}");
+    if let Some(result) = shortest_path2(&bur2) {
+        println!("Result part 1: {}", result);
+    } else {
+        println!("Result part 1: Could not find path");
     }
 
 }
