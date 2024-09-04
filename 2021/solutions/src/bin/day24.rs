@@ -1,5 +1,4 @@
 use std::fs;
-use std::fmt;
 
 #[derive(Clone, Copy, Debug)]
 enum Register {
@@ -54,139 +53,88 @@ enum Instruction {
 
 type Program = Vec<Instruction>;
 
-#[derive(Clone, Debug)]
-struct ALU {
-    w: i64,
-    x: i64,
-    y: i64,
-    z: i64,
+fn program_subprocs(prog: &Program) -> Vec<SubProc> {
+    let mut result : Vec<SubProc> = Vec::new();
+    for (i, inst) in prog.iter().enumerate() {
+        let mut new_subproc = SubProc{p1: 0, p2: 0, p3: 0};
+        if let Instruction::INP(Register::W) = inst {
+            if let Instruction::ADD(_, RightOperand::Literal(lit)) = prog[i+5]{
+                new_subproc.p1 = lit;
+            } else {
+                panic!("Invalid subproc!");
+            }
+            if let Instruction::ADD(_, RightOperand::Literal(lit)) = prog[i+15]{
+                new_subproc.p2 = lit;
+            } else {
+                panic!("Invalid subproc!");
+            }
+            if let Instruction::DIV(_, RightOperand::Literal(lit)) = prog[i+4]{
+                new_subproc.p3 = lit;
+            } else {
+                panic!("Invalid subproc!");
+            }
+            result.push(new_subproc);
+        } else {
+            continue;
+        }
+    }
+    return result;
 }
 
-impl ALU {
-    fn get_reg(&self, r: Register) -> i64 {
-        match r {
-            Register::W => {
-                self.w
-            },
-            Register::X => {
-                self.x
-            },
-            Register::Y => {
-                self.y
-            },
-            Register::Z => {
-                self.z
-            },
-        }
-    }
+#[derive(Debug)]
+struct SubProc {
+    p1: i64,
+    p2: i64,
+    p3: i64,
+}
 
-    fn set_reg(&mut self, r: Register, v: i64) {
-        match r {
-            Register::W => {
-                self.w = v;
-            },
-            Register::X => {
-                self.x = v;
-            },
-            Register::Y => {
-                self.y = v;
-            },
-            Register::Z => {
-                self.z = v;
-            },
-        }
-    }
-
-    fn exec(&self, p: Program, mut input: &[char]) -> Self {
-        let mut res = self.clone();
-        for inst in p {
-            match inst {
-                Instruction::INP(reg) => {
-                    if input.is_empty() {panic!("empty input slice")}
-                    if let Some(inp) = input[0].to_digit(10){
-                        res.set_reg(reg, inp as i64);
-                        input = &input[1..];
-                    } else {
-                        panic!("cannot parse input");
-                    }
-                },
-                Instruction::ADD(reg1, ro) => {
-                    match ro {
-                        RightOperand::Literal(lit) => {
-                            res.set_reg(reg1, lit+res.get_reg(reg1));
-                        },
-                        RightOperand::Reg(reg2) => {
-                            res.set_reg(reg1, res.get_reg(reg1)+res.get_reg(reg2));
-                        },
-                    }
-                },
-                Instruction::MUL(reg1, ro) => {
-                    match ro {
-                        RightOperand::Literal(lit) => {
-                            res.set_reg(reg1, lit*res.get_reg(reg1));
-                        },
-                        RightOperand::Reg(reg2) => {
-                            res.set_reg(reg1, res.get_reg(reg1)*res.get_reg(reg2));
-                        },
-                    }
-                },
-                Instruction::DIV(reg1, ro) => {
-                    match ro {
-                        RightOperand::Literal(lit) => {
-                            if lit == 0i64 {
-                                panic!("Cannot DIV by 0");
-                            }
-                            res.set_reg(reg1, res.get_reg(reg1)/lit);
-                        },
-                        RightOperand::Reg(reg2) => {
-                            if res.get_reg(reg2) == 0i64 {
-                                panic!("Cannot DIV by 0");
-                            }
-                            res.set_reg(reg1, res.get_reg(reg1)/res.get_reg(reg2));
-                        },
-                    }
-                },
-                Instruction::MOD(reg1, ro) => {
-                    if res.get_reg(reg1) < 0i64 {
-                        panic!("Cannot MOD A B, A cannot be neg");
-                    }
-                    match ro {
-                        RightOperand::Literal(lit) => {
-                            if lit <= 0i64 {
-                                panic!("Cannot MOD A B, B cannot be NEG or ZERO");
-                            }
-                            res.set_reg(reg1, res.get_reg(reg1)%lit);
-                        },
-                        RightOperand::Reg(reg2) => {
-                            if res.get_reg(reg2) <= 0i64 {
-                                panic!("Cannot MOD A B, B cannot be NEG or ZERO");
-                            }
-                            res.set_reg(reg1, res.get_reg(reg1)%res.get_reg(reg2));
-                        },
-                    }
-                },
-                Instruction::EQL(reg1, ro) => {
-                    match ro {
-                        RightOperand::Literal(lit) => {
-                            if res.get_reg(reg1)==lit {
-                                res.set_reg(reg1, 1);
-                            } else {
-                                res.set_reg(reg1, 0);
-                            }
-                        },
-                        RightOperand::Reg(reg2) => {
-                            if res.get_reg(reg1)==res.get_reg(reg2) {
-                                res.set_reg(reg1, 1);
-                            } else {
-                                res.set_reg(reg1, 0);
-                            }
-                        },
-                    }
-                },
+impl SubProc {
+    fn inv_run(&self, output: i64) -> Vec<[i64; 2]> {
+        let mut result : Vec<[i64; 2]> = Vec::new();
+        for i in 0..self.p3 {
+            for w in 1..=9 {
+                if ((output*self.p3+i) % 26)+self.p1 == w{
+                    result.push([output*self.p3+i, w]);
+                }
             }
         }
-        return res;
+        for w in 1..=9{
+            let k = output-w-self.p2;
+            if k % 26 != 0{
+                continue;
+            }
+            let k = k / 26;
+            for i in 0..self.p3{
+                let z = k*self.p3+i;
+                if ((z % 26) + self.p1) != w{
+                    result.push([z, w]);
+                }
+            }
+        }
+        return result
     }
+
+}
+
+fn solve(sub_procs: &Vec<SubProc>, depth: usize, expected_output: i64) -> Vec<u64> {
+    let mut result : Vec<u64> = Vec::new();
+    let current = sub_procs.get(depth-1).expect("invalid depth");
+    if depth == 1 {
+        let next = current.inv_run(expected_output);
+        for n in next{
+            if n[0] == 0 {
+                result.push((n[1] as u64)*10u64.pow(13))
+            }
+        }
+    } else {
+        let next = current.inv_run(expected_output);
+        for n in next{
+            for n_res in solve(sub_procs, depth-1, n[0]) {
+                result.push(n_res + (n[1] as u64)*10u64.pow( (14-depth) as u32));
+            }
+        }
+    }
+    return result;
 }
 
 fn main() {
@@ -207,17 +155,6 @@ fn main() {
     .collect::<Vec<&str>>();
 
     let mut program : Program = Vec::new();
-
-    let start_alu = ALU{
-        w: 0,
-        x: 0,
-        y: 0,
-        z: 0,
-    };
-
-    let inp_u64 = 99999999999999u64;
-
-    let input = inp_u64.to_string().chars().collect::<Vec<char>>();
 
     for line in input_lines {
         let words = line.split(|x| x == ' ').collect::<Vec<&str>>();
@@ -271,11 +208,11 @@ fn main() {
         };
     }
 
-    let input = 39999999999999u64.to_string().chars().collect::<Vec<char>>();
-    let alu = start_alu.exec(program.clone(), &input);
+    let sub_procs = program_subprocs(&program);
 
-    println!("{z}", z = alu.z);
+    let res = solve(&sub_procs, 14, 0);
 
-
+    println!("Result part 1: {result}", result = res.iter().max().expect("no result possible"));
+    println!("Result part 2: {result}", result = res.iter().min().expect("no result possible"));
 
 }
