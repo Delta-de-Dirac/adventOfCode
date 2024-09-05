@@ -27,7 +27,7 @@ fn main(){
 
     'outer: for line in input_lines {
         let mut brac_stack : Vec<char> = Vec::new();
-        let mut line = line.chars();
+        let mut line = line.trim().chars();
         let mut current_block = line.next().expect("No char at line");
         while let Some(ch) = line.next(){
             match ch {

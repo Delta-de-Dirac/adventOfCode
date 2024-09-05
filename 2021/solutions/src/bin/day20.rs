@@ -174,13 +174,13 @@ fn main(){
 
     board = board.tick();
     board = board.tick();
-    println!("{board}");
+    //println!("{board}");
     println!("Result part 1: {}", board.light_pix.len());
 
     for _ in 0..48 {
         board = board.tick();
     }
-    println!("{board}");
+    //println!("{board}");
     println!("Result part 2: {}", board.light_pix.len());
 
 }

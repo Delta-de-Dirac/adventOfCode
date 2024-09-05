@@ -204,10 +204,10 @@ fn main(){
     let mut sensors : Vec<Sensor> = Vec::new();
     let mut unvisited : Vec<bool> = Vec::new();
 
-    for sensor_block in input_lines.split(|x| x.is_empty()) {
+    for sensor_block in input_lines.split(|x| x.trim().is_empty()) {
         let mut sensor : Sensor = Vec::new();
         for line in sensor_block[1..].iter() {
-            let line : Vec<&str> = line.split(|x| x == ',').collect();
+            let line : Vec<&str> = line.trim().split(|x| x == ',').collect();
             let x : i32 = line.get(0).expect("Invalid input file").parse::<i32>().expect("Invalid input file");
             let y : i32 = line.get(1).expect("Invalid input file").parse::<i32>().expect("Invalid input file");
             let z : i32 = line.get(2).expect("Invalid input file").parse::<i32>().expect("Invalid input file");

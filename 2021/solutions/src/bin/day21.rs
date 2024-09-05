@@ -96,6 +96,7 @@ fn main() {
     let player_1_start : u32 = input_lines
                             .get(0)
                             .expect("invalid input")
+                            .trim()
                             .split(|x| x == ' ')
                             .nth(4)
                             .expect("invalid input")
@@ -105,6 +106,7 @@ fn main() {
     let player_2_start : u32 = input_lines
                             .get(1)
                             .expect("invalid input")
+                            .trim()
                             .split(|x| x == ' ')
                             .nth(4)
                             .expect("invalid input")

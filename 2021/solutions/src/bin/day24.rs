@@ -157,7 +157,7 @@ fn main() {
     let mut program : Program = Vec::new();
 
     for line in input_lines {
-        let words = line.split(|x| x == ' ').collect::<Vec<&str>>();
+        let words = line.trim().split(|x| x == ' ').collect::<Vec<&str>>();
         let op = words[0];
         match op {
             "inp" => {

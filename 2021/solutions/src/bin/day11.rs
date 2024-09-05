@@ -72,6 +72,7 @@ fn main(){
 
     for (l, line) in input_lines.clone().enumerate() {
         octo[l] = line
+                    .trim()
                     .chars()
                     .map(|x| x.to_digit(10).expect("invalid digit at input") as u8)
                     .collect::<Vec<u8>>()
@@ -91,6 +92,7 @@ fn main(){
 
     for (l, line) in input_lines.enumerate() {
         octo[l] = line
+        .trim()
         .chars()
         .map(|x| x.to_digit(10).expect("invalid digit at input") as u8)
         .collect::<Vec<u8>>()

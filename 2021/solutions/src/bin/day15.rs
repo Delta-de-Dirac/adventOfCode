@@ -85,7 +85,7 @@ fn main(){
     let mut cavern : Vec<Vec<usize>> = Vec::new();
 
     for line in input_lines.iter() {
-        cavern.push(line.chars().map(|x| x.to_digit(10).expect("can't parse") as usize).collect());
+        cavern.push(line.trim().chars().map(|x| x.to_digit(10).expect("can't parse") as usize).collect());
     }
 
     let cavern = cavern;

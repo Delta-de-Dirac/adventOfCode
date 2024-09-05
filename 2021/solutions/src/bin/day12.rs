@@ -85,7 +85,9 @@ fn main(){
     let mut unvisited: HashSet<String> = HashSet::new();
 
     for line in input_lines{
-        let line = line.split(|x| x == '-')
+        let line = line
+                       .trim()
+                       .split(|x| x == '-')
                        .map(|x| x.to_string())
                        .collect::<Vec<String>>();
         let c1 = line.get(0).expect("invalid input");

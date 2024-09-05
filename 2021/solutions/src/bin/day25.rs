@@ -64,7 +64,7 @@ fn main() {
     let mut south_cucumbers: HashSet::<[u8; 2]> = HashSet::new();
 
     for (l, line) in input_lines.iter().enumerate() {
-        for (c, ch) in line.chars().enumerate() {
+        for (c, ch) in line.trim().chars().enumerate() {
             match ch {
                 '>' => {east_cucumbers.insert( [l as u8,c as u8]);},
                 'v' => {south_cucumbers.insert([l as u8,c as u8]);},

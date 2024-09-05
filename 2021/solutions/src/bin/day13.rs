@@ -70,14 +70,14 @@ fn main(){
                 parsing_dots = false;
                 continue;
             }
-            let mut line = line.split(|x| x == ',');
+            let mut line = line.trim().split(|x| x == ',');
             let x = line.next().expect("Error parsing dot x");
             let y = line.next().expect("Error parsing dot y");
             dots.insert(
                 [x.parse::<u32>().expect("Error parsing dot x"),
                  y.parse::<u32>().expect("Error parsing dot y")]);
         } else {
-            let mut line = line.split(|x| x == ' ' || x == '=').skip(2);
+            let mut line = line.trim().split(|x| x == ' ' || x == '=').skip(2);
             match line.next().expect("Invalid fold line"){
                 "x" => {
                     let value = line.next().expect("Invalid fold value");

@@ -318,6 +318,7 @@ fn main() {
 
     for line in input_lines.iter() {
         let line : Vec<&str> = line
+            .trim()
             .split(|x| " ,.=xyz".contains(x))
             .filter(|x| x.len() > 0)
             .collect();
@@ -358,11 +359,11 @@ fn main() {
     }
 
     println!("Result part 1: {}", total_area(&on_region));
-
     let mut on_region = Vec::<Rect3D>::new();
 
     for line in input_lines.iter() {
         let line : Vec<&str> = line
+        .trim()
         .split(|x| " ,.=xyz".contains(x))
         .filter(|x| x.len() > 0)
         .collect();
@@ -381,6 +382,7 @@ fn main() {
             ];
 
             match *line.get(0).expect("invalid input") {
+
                 "on"  => {
                     on_region.extend(insert_on(&on_region, &rect).iter());
                 },
@@ -392,6 +394,10 @@ fn main() {
                 },
             }
     }
+
+
+
+
 
     println!("Result part 2: {}", total_area(&on_region));
 }

@@ -83,7 +83,7 @@ fn main(){
     let first_line = input_lines.next().unwrap_or_else(|| {
         eprintln!("No line found at input");
         std::process::exit(1);
-    });
+    }).trim_ascii();
 
     for entry in first_line {
         match entry{
@@ -101,7 +101,7 @@ fn main(){
     }
 
     for line in input_lines {
-        for (acc, entry) in iter::zip(&mut acc_column, line) {
+        for (acc, entry) in iter::zip(&mut acc_column, line.trim_ascii()) {
             match entry {
                 b'1' =>{*acc += 1;}
                 b'0' =>{*acc -= 1;}
@@ -139,6 +139,7 @@ fn main(){
     let input_lines = input_file
         .trim_ascii()
         .split(|x| *x == b'\n')
+        .map(|x| x.trim_ascii())
         .collect::<Vec<&[u8]>>();
 
     let oxy = oxy_rating(&input_lines).unwrap_or_else(|err| {
