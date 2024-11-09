@@ -24,3 +24,24 @@ for (let line = 0; line < nLines; line++){
 console.log(`Result part 1: ${result}`);
 
 // Part 2
+
+const rightIncrements = [1, 3, 5, 7, 1];
+const downIncrements  = [1, 1, 1, 1, 2];
+const scenarioCount   = rightIncrements.length;
+
+result = 1;
+
+for (let i = 0; i < scenarioCount; i++){
+    column = 0;
+    let resultFactor = 0;
+    for (let line = 0; line < nLines; line+=downIncrements[i]){
+        if (isThereTreeAt(line, column, inputLines)) {
+            resultFactor += 1;
+        }
+        column += rightIncrements[i];
+    }
+    result *= resultFactor;
+}
+
+console.log(`Result part 2: ${result}`);
+
