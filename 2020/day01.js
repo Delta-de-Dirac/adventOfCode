@@ -4,14 +4,13 @@ const inputContent  = await file.text();
 const inputLines    = inputContent.trim().split("\n");
 const nLines        = inputLines.length;
 
-
 // Part 1
 outer:
 for (let l = 0; l < nLines-1; l++) {
     const lNumber = Number(inputLines.at(l));
     for (let r = l+1; r < nLines; r++) {
         const rNumber = Number(inputLines.at(r));
-        if (lNumber + rNumber == 2020) {
+        if (lNumber + rNumber === 2020) {
             const result = lNumber * rNumber;
             console.log(`Result part 1: ${result}`)
             break outer;
@@ -30,7 +29,7 @@ for (let l = 0; l < nLines-2; l++) {
         }
         for (let r = m+1; r < nLines; r++) {
             const rNumber = Number(inputLines.at(r));
-            if (lNumber + mNumber + rNumber == 2020) {
+            if (lNumber + mNumber + rNumber === 2020) {
                 const result = lNumber * mNumber * rNumber;
                 console.log(`Result part 2: ${result}`)
                 break outer;
