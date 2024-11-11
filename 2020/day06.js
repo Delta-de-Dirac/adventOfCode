@@ -61,5 +61,5 @@ for (let i = 1; i < currentSetArray.length; i++){
 result += intersectionSet.size;
 currentSetArray = new Array();
 
-console.log(`Result part 1: ${result}`);
+console.log(`Result part 2: ${result}`);
 
