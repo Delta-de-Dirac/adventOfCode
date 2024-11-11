@@ -4,9 +4,7 @@ const inputContent  = await file.text();
 const inputLines    = inputContent.trim().split("\n");
 const nLines        = inputLines.length;
 
-
 // Part 1
-
 
 const requiredFields = new Set([
     "byr",
@@ -34,9 +32,11 @@ for (let line of inputLines){
         }
     }
 }
+
 if (requiredFields.isSubsetOf(fields)) {
     result += 1;
 }
+
 fields.clear();
 
 console.log(`Result part 1: ${result}`);
@@ -137,9 +137,11 @@ for (let line of inputLines){
         }
     }
 }
+
 if (requiredFields.isSubsetOf(fields)) {
     result += 1;
 }
+
 fields.clear();
 
 console.log(`Result part 2: ${result}`);
