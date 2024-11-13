@@ -10,6 +10,9 @@ let result = 0;
 
 const bags = new Map();
 
+const checkContainShinyGoldSet = new Set();
+
+
 for (const line of inputLines) {
     const bag     = line.split("bags contain").at(0).trim();
     const content = line.split("bags contain").at(1).trim();
@@ -27,14 +30,66 @@ for (const line of inputLines) {
         }
     }
     bags.set(bag, bagMap);
-    console.log(bags.get(bag));
+    checkContainShinyGoldSet.add(bag);
 }
+
+const containShinyGold = new Set();
+
+function verifyBag(bag, bagMap, checkSet, containShinyGoldSet) {
+  if (!checkSet.has(bag)) {
+      return false;
+  }
+  
+  checkSet.delete(bag);
+  
+  for (const bagInside of bagMap.get(bag).keys()){
+      if (bagInside === 'shiny gold') {
+          containShinyGoldSet.add(bag);
+          return true;
+      } else if (containShinyGoldSet.has(bagInside)) {
+          containShinyGoldSet.add(bag);
+          return true;
+      } else {
+          if (verifyBag(bagInside, bagMap, checkSet, containShinyGoldSet)) {
+              containShinyGoldSet.add(bag);
+              return true;
+          } else {
+              continue;
+          }
+      }
+  }
+  return false;
+}
+
+while (checkContainShinyGoldSet.size !== 0) {
+    const iterator = checkContainShinyGoldSet.values()
+    const nextVal = iterator.next().value
+    verifyBag(nextVal, bags, checkContainShinyGoldSet, containShinyGold);
+}
+
+result = containShinyGold.size;
 
 console.log(`Result part 1: ${result}`);
 
 // Part 2
 
-result = 0;
+const countingMemo = new Map();
+
+function countInside(bag, bagMap) {
+    if (countingMemo.has(bag)) {
+        return countingMemo.get(bag);
+    } else {
+        let count = 0;
+        for (const [bagInside, bagInsideCount] of bagMap.get(bag)) {
+            count += bagInsideCount*(countInside(bagInside, bagMap) + 1);
+        }
+        countingMemo.set(bag, count);
+        return count;
+    }
+}
+
+
+result = countInside("shiny gold", bags);
 
 
 console.log(`Result part 2: ${result}`);
