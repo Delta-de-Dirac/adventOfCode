@@ -18,3 +18,5 @@ So far I have implemented solutions for some days of years 2020, 2021, 2022 and 
 2022 - Python
 
 2023 - Go
+
+2024 - Lua
