@@ -1,7 +1,7 @@
 local io = require("io")
 
 -- input
-io.input("input/day01.txt")
+io.input("input/day02.txt")
 local line = io.read("*line")
 local lines = {}
 while line do
@@ -12,73 +12,53 @@ io.input()
 -- end input
 
 -- solution 1
-left_list  = {}
-right_list = {}
 
-for k, v in pairs(lines) do
-    local _, _, l, r = string.find(v, "(%w+)%s+(%w+)")
-    l = tonumber(l)
-    r = tonumber(r)
-    table.insert(left_list,  l)
-    table.insert(right_list, r)
+local safe_reports = 0;
+
+for _, line in pairs(lines) do
+    local safe       = true
+    local last_level = nil
+    local increasing = false
+    local decreasing = false
+    for word in string.gmatch(line, "[^%s]+") do 
+        local current_level = tonumber(word)
+        if last_level then
+            local difference = current_level - last_level
+            if math.abs(difference) < 1 or math.abs(difference) > 3 then
+                safe = false
+                break
+            end
+            if increasing then
+                if difference < 0 then
+                    safe = false
+                    break
+                end
+            elseif decresing then
+                if difference > 0 then
+                    safe = false
+                    break
+                end
+            else
+                if difference < 0 then
+                    decreasing = true
+                elseif difference > 0 then
+                    increasing = true
+                end
+            end
+        end
+        last_level = current_level
+    end
+    if safe then
+        safe_reports = safe_reports + 1
+    end
 end
 
-table.sort(left_list)
-table.sort(right_list)
-
-local total = 0
-
-for k,v in pairs(left_list) do
-    total = total + math.abs(left_list[k] - right_list[k])
-end
-
-io.write("Result part 1: " .. total .. "\n")
+io.write("Result part 1: " .. safe_reports .. "\n")
 -- end solution 1
 
 -- solution 2
-total = 0
 
-local l = 1
-local r = 1
-
-while l <= #left_list do
-    local rcount = 0
-    local lcount = 1
-    local break_outer_loop = false
-    
-    while l < #left_list and left_list[l] == left_list[l+1] do
-        lcount = lcount + 1
-        l = l + 1
-    end
-    
-    while left_list[l] > right_list[r] do
-        r = r + 1
-        if r > #right_list then
-            break_outer_loop = true
-            break
-        end
-    end
-    if break_outer_loop then 
-        total = total + rcount * lcount * left_list[l]
-        break 
-    end
-    while left_list[l] == right_list[r] do
-        rcount = rcount + 1
-        r = r + 1
-        if r > #right_list then
-            break_outer_loop = true
-            break
-        end
-    end
-    if break_outer_loop then 
-        total = total + rcount * lcount * left_list[l]
-        break 
-    end
-    total = total + rcount * lcount * left_list[l]
-    l = l + 1
-end
-
-io.write("Result part 2: " .. total .. "\n")
+io.write("Result part 2: " .. 'x' .. "\n")
 -- end solution 2
 
 
