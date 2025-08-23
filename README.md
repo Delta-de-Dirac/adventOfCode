@@ -7,7 +7,7 @@ https://adventofcode.com/about
 # Content of this repository
 Solutions for Advent of Code problems. 
 
-So far I have implemented solutions for some days of years 2020, 2021, 2022 and 2023.
+So far I have implemented solutions for some days of years 2020, 2021, 2022, 2023 and 2024.
 
 ## Languages of each year
 
